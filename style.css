@@ -113,13 +113,14 @@ a{text-decoration:none;color:inherit}
 .badge-other{background:var(--surface3);color:var(--sub)}
 .badge-empty{color:var(--muted)}
 
-/* GITHUB BUTTON */
-.gh-btn{background:var(--surface2);color:var(--sub);border:1px solid var(--border);
-  border-radius:6px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;
-  display:flex;align-items:center;gap:7px;transition:all .15s}
-.gh-btn:hover{border-color:var(--accent);color:var(--accent)}
-.gh-btn--active{border-color:#3fb950;color:#3fb950}
-.gh-btn--active:hover{background:rgba(63,185,80,.1)}
+/* GITHUB FOOTER LINK */
+.gh-footer{text-align:center;padding:28px 0 20px}
+.gh-footer-link{background:none;border:none;color:var(--muted);font-size:11px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  opacity:.45;transition:opacity .2s;font-family:inherit}
+.gh-footer-link:hover{opacity:1}
+.gh-footer-link--active{color:var(--green);opacity:.55}
+.gh-footer-link--active:hover{opacity:1}
 
 /* GITHUB MODAL */
 .gh-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);
@@ -181,7 +182,7 @@ a{text-decoration:none;color:inherit}
   @page{size:A4 landscape;margin:12mm 10mm}
 
   body{background:#fff !important;color:#000 !important;font-size:10pt}
-  .nav,.pdf-btn,.save-btn,.gh-btn,.gh-modal-overlay,.toast{display:none !important}
+  .nav,.pdf-btn,.save-btn,.gh-footer,.gh-modal-overlay,.toast{display:none !important}
   .phdr{padding:0 0 8pt;page-break-after:avoid}
   .phdr h1{font-size:14pt;color:#000;font-weight:700}
   .phdr-sub{font-size:8pt;color:#555}
