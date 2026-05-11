@@ -1,24 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Soutenances Portfolio MMI 2025-26</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="hero">
-  <div class="year-badge">Année universitaire 2025-26</div>
-  <h1>Soutenances Portfolio MMI</h1>
-  <p>Gestion des jurys de soutenance — IUT MMI</p>
-</div>
-<div class="index-grid">
-  <a class="icard" href="mmi3_alt.html"><div class="icard-icon">🎓</div><h2>MMI3 — Alternants</h2><div class="icard-sub">Soutenances Portfolio 2025-26</div><div class="icard-arrow">Voir les jurys <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22L10.94 8 6.22 12.78l.94.94L12.44 8 7.16 2.28l-.94.94z"/></svg></div></a>
-  <a class="icard" href="mmi3_init.html"><div class="icard-icon">🎓</div><h2>MMI3 — Initiaux</h2><div class="icard-sub">Soutenances Portfolio 2025-26</div><div class="icard-arrow">Voir les jurys <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22L10.94 8 6.22 12.78l.94.94L12.44 8 7.16 2.28l-.94.94z"/></svg></div></a>
-  <a class="icard" href="mmi2_init.html"><div class="icard-icon">📚</div><h2>MMI2 — Initiaux</h2><div class="icard-sub">Soutenances Portfolio 2025-26</div><div class="icard-arrow">Voir les jurys <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22L10.94 8 6.22 12.78l.94.94L12.44 8 7.16 2.28l-.94.94z"/></svg></div></a>
-  <a class="icard" href="mmi2_alt.html"><div class="icard-icon">📚</div><h2>MMI2 — Alternants</h2><div class="icard-sub">Soutenances Portfolio 2025-26</div><div class="icard-arrow">Voir les jurys <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22L10.94 8 6.22 12.78l.94.94L12.44 8 7.16 2.28l-.94.94z"/></svg></div></a>
-  <a class="icard" href="mmi1.html"><div class="icard-icon">📝</div><h2>MMI1</h2><div class="icard-sub">Soutenances Portfolio 2025-26</div><div class="icard-arrow">Voir les jurys <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 3.22L10.94 8 6.22 12.78l.94.94L12.44 8 7.16 2.28l-.94.94z"/></svg></div></a>
-</div>
-<script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Soutenances Portfolio MMI 2025-26</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="hero">
+      <div class="year-badge">Année universitaire 2025-26</div>
+      <h1>Soutenances Portfolio MMI</h1>
+      <p>Gestion des jurys de soutenance — IUT MMI</p>
+    </div>
+    <div class="index-grid" style="display: block">
+      <!-- Ligne 1 : MMI 1 -->
+      <div class="index-row single">
+        <a href="mmi1.html" class="icard">
+          <div class="icard-icon">🎓</div>
+          <h2>MMI 1</h2>
+          <div class="icard-sub">Année complète</div>
+          <div class="icard-arrow">Gérer les jurys <span>→</span></div>
+        </a>
+      </div>
+
+      <!-- Ligne 2 : MMI 2 Initiaux & Alternants -->
+      <div class="index-row">
+        <a href="mmi2_init.html" class="icard">
+          <div class="icard-icon">🎓</div>
+          <h2>MMI 2 — Initiaux</h2>
+          <div class="icard-sub">Formation initiale</div>
+          <div class="icard-arrow">Gérer les jurys <span>→</span></div>
+        </a>
+        <a href="mmi2_alt.html" class="icard">
+          <div class="icard-icon">💼</div>
+          <h2>MMI 2 — Alternants</h2>
+          <div class="icard-sub">En alternance</div>
+          <div class="icard-arrow">Gérer les jurys <span>→</span></div>
+        </a>
+      </div>
+
+      <!-- Ligne 3 : MMI 3 Initiaux & Alternants -->
+      <div class="index-row">
+        <a href="mmi3_init.html" class="icard">
+          <div class="icard-icon">🎓</div>
+          <h2>MMI 3 — Initiaux</h2>
+          <div class="icard-sub">Formation initiale</div>
+          <div class="icard-arrow">Gérer les jurys <span>→</span></div>
+        </a>
+        <a href="mmi3_alt.html" class="icard">
+          <div class="icard-icon">💼</div>
+          <h2>MMI 3 — Alternants</h2>
+          <div class="icard-sub">En alternance</div>
+          <div class="icard-arrow">Gérer les jurys <span>→</span></div>
+        </a>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
 </html>
