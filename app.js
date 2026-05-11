@@ -366,6 +366,24 @@ function showGHStatus(msg, type) {
 
 /* ── Sauvegarder (GitHub prioritaire, sinon File System API) ─────── */
 async function saveSelectionsToFile() {
+  // Demande le mot de passe via une pop-up native du navigateur
+  const pwd = prompt(
+    "Veuillez saisir le mot de passe pour autoriser la sauvegarde :",
+  );
+  if (pwd === null) return; // L'utilisateur a cliqué sur Annuler
+
+  // Vérification sécurisée (obfuscation XOR du mot de passe attendu)
+  const secret = [
+    126, 110, 90, 94, 130, 34, 94, 96, 104, 105, 110, 42, 41, 44, 41,
+  ];
+  const isAuth =
+    pwd.length === secret.length &&
+    pwd.split("").every((c, i) => (c.charCodeAt(0) ^ 45) + i === secret[i]);
+  if (!isAuth) {
+    alert("Mot de passe incorrect. Sauvegarde annulée.");
+    return;
+  }
+
   if (isGHConfigured()) {
     await saveToGitHub();
     return;
