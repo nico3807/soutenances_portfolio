@@ -451,6 +451,23 @@ function exportPDF() {
 
 /* ── Init ────────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
+  // Applique la même structure d'accessibilité (aria-label) à toutes les pages
+  document.querySelectorAll(".tselect").forEach((select) => {
+    const lbl = select.previousElementSibling;
+    if (lbl && lbl.classList.contains("mlbl")) {
+      select.setAttribute("aria-label", lbl.textContent.trim());
+    }
+  });
+
+  // Tri alphabétique automatique (corrigé pour ne pas effacer les valeurs par défaut)
+  document.querySelectorAll(".tselect").forEach((select) => {
+    const currentValue = select.value;
+    const options = Array.from(select.options).slice(1); // Ignore "— Sélectionner —"
+    options.sort((a, b) => a.text.localeCompare(b.text, "fr"));
+    options.forEach((opt) => select.appendChild(opt));
+    select.value = currentValue;
+  });
+
   injectGHUI();
   await loadFromServer();
   loadAll();
