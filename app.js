@@ -4,8 +4,6 @@ const PAGE_ID = (location.pathname.split("/").pop() || "index").replace(
   ".html",
   "",
 );
-const IDB_NAME = "sout_handles_v1";
-const IDB_STORE = "fh";
 const GH_KEY = "gh_cfg_v1";
 
 /* ── localStorage auto-save ──────────────────────────────────────── */
@@ -67,63 +65,6 @@ function applyJSON(text) {
   }
 }
 
-/* ── IndexedDB – persist FileSystemFileHandle ────────────────────── */
-function idbOpen() {
-  return new Promise((res, rej) => {
-    const r = indexedDB.open(IDB_NAME, 1);
-    r.onupgradeneeded = (e) => e.target.result.createObjectStore(IDB_STORE);
-    r.onsuccess = (e) => res(e.target.result);
-    r.onerror = (e) => rej(e.target.error);
-  });
-}
-async function idbGet(key) {
-  try {
-    const db = await idbOpen();
-    return new Promise((res) => {
-      const r = db.transaction(IDB_STORE).objectStore(IDB_STORE).get(key);
-      r.onsuccess = (e) => res(e.target.result ?? null);
-      r.onerror = () => res(null);
-    });
-  } catch {
-    return null;
-  }
-}
-async function idbPut(key, val) {
-  try {
-    const db = await idbOpen();
-    await new Promise((res, rej) => {
-      const tx = db.transaction(IDB_STORE, "readwrite");
-      tx.objectStore(IDB_STORE).put(val, key);
-      tx.oncomplete = res;
-      tx.onerror = rej;
-    });
-  } catch {
-    /* ignore */
-  }
-}
-
-/* ── File System Access API helpers ──────────────────────────────── */
-async function getWritableHandle() {
-  let handle = await idbGet("donnees_json");
-  if (handle) {
-    let perm = await handle.queryPermission({ mode: "readwrite" });
-    if (perm !== "granted")
-      perm = await handle.requestPermission({ mode: "readwrite" });
-    if (perm === "granted") return handle;
-  }
-  handle = await window.showSaveFilePicker({
-    id: "sout_save",
-    suggestedName: "donnees.json",
-    types: [
-      {
-        description: "Fichier JSON",
-        accept: { "application/json": [".json"] },
-      },
-    ],
-  });
-  await idbPut("donnees_json", handle);
-  return handle;
-}
 
 /* ── GitHub API ──────────────────────────────────────────────────── */
 function getGHConfig() {
@@ -364,15 +305,13 @@ function showGHStatus(msg, type) {
   s.style.display = "block";
 }
 
-/* ── Sauvegarder (GitHub prioritaire, sinon File System API) ─────── */
+/* ── Sauvegarder ─────────────────────────────────────────────────── */
 async function saveSelectionsToFile() {
-  // Demande le mot de passe via une pop-up native du navigateur
   const pwd = prompt(
     "Veuillez saisir le mot de passe pour autoriser la sauvegarde :",
   );
-  if (pwd === null) return; // L'utilisateur a cliqué sur Annuler
+  if (pwd === null) return;
 
-  // Vérification sécurisée (obfuscation XOR du mot de passe attendu)
   const secret = [
     126, 110, 90, 94, 130, 34, 94, 96, 104, 105, 110, 42, 41, 44, 41,
   ];
@@ -384,54 +323,15 @@ async function saveSelectionsToFile() {
     return;
   }
 
-  if (isGHConfigured()) {
-    await saveToGitHub();
+  if (!isGHConfigured()) {
+    showToast("⚙ Configurez GitHub via le lien en bas de page");
+    openGHModal();
     return;
   }
-  const jsonStr = buildJSON();
-  if (window.showSaveFilePicker) {
-    try {
-      const handle = await getWritableHandle();
-      const w = await handle.createWritable();
-      await w.write(jsonStr);
-      await w.close();
-      showToast("✓ Sauvegarde réussie");
-    } catch (e) {
-      if (e.name !== "AbortError") downloadJSON(jsonStr);
-    }
-  } else {
-    downloadJSON(jsonStr);
-  }
+
+  await saveToGitHub();
 }
 
-function downloadJSON(jsonStr) {
-  const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "donnees.json";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
-  showToast("✓ Fichier téléchargé");
-}
-
-/* ── Auto-load depuis fichier local ──────────────────────────────── */
-async function autoLoadFromFile() {
-  if (!window.FileSystemFileHandle) return;
-  const handle = await idbGet("donnees_json");
-  if (!handle) return;
-  try {
-    const perm = await handle.queryPermission({ mode: "read" });
-    if (perm !== "granted") return;
-    const file = await handle.getFile();
-    const text = await file.text();
-    applyJSON(text);
-    showToast("↺ Sélections restaurées depuis le fichier");
-  } catch {
-    /* fichier inaccessible */
-  }
-}
 
 /* ── Auto-load depuis le dossier courant (serveur local) ─────────── */
 async function loadFromServer() {
@@ -491,7 +391,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadAll();
   if (isGHConfigured()) {
     await loadFromGitHub();
-  } else {
-    await autoLoadFromFile();
   }
 });
