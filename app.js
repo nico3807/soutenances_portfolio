@@ -12,6 +12,7 @@ let APP_CONFIG = {
   enseignants: [],
   salles: [],
   horaires: {},
+  etudiants: {},
 };
 let _cfgImportedNames = [];
 
@@ -590,22 +591,9 @@ async function saveCfgModal() {
   }
   uniqueDates.forEach((d, i) => { newEntries[`${level}_date${i + 1}`] = d; });
 
-  if (_cfgImportedNames.length > 0) {
-    const slots = cfgGetSlotsPerJury();
-    let idx = 0;
-    for (let n = 1; n <= juryCount; n++) {
-      for (let m = 1; m <= (slots[n - 1] || 0); m++) {
-        if (idx < _cfgImportedNames.length) {
-          newEntries[`${level}_jury${n}_sname${m}`] = _cfgImportedNames[idx++];
-        }
-      }
-    }
-  }
-
   const merged = {};
   for (const [k, v] of Object.entries(APP_CONFIG.horaires)) {
     if (!k.startsWith(`${level}_`)) merged[k] = v;
-    else if (/_sname\d+$/.test(k) && _cfgImportedNames.length === 0) merged[k] = v;
   }
   Object.assign(merged, newEntries);
 
@@ -618,6 +606,29 @@ async function saveCfgModal() {
       `Sync donnees ${level} — ${ts}`);
     APP_CONFIG.horaires = merged;
     applyHoraires(merged);
+
+    if (_cfgImportedNames.length > 0) {
+      const slots = cfgGetSlotsPerJury();
+      let idx = 0;
+      const etudiantsEntries = {};
+      for (let n = 1; n <= juryCount; n++) {
+        for (let m = 1; m <= (slots[n - 1] || 0); m++) {
+          if (idx < _cfgImportedNames.length) {
+            etudiantsEntries[`${level}_jury${n}_sname${m}`] = _cfgImportedNames[idx++];
+          }
+        }
+      }
+      const mergedEtudiants = {};
+      for (const [k, v] of Object.entries(APP_CONFIG.etudiants)) {
+        if (!k.startsWith(`${level}_`)) mergedEtudiants[k] = v;
+      }
+      Object.assign(mergedEtudiants, etudiantsEntries);
+      await saveJsonToGitHub("etudiants.json", JSON.stringify(mergedEtudiants, null, 2),
+        `Candidats ${level} — ${ts}`);
+      APP_CONFIG.etudiants = mergedEtudiants;
+      applyEtudiants(mergedEtudiants);
+    }
+
     showCfgStatus("✓ Configuration sauvegardée !", "success");
     setTimeout(closeCfgModal, 1400);
   } catch (e) {
@@ -669,17 +680,20 @@ async function loadFromServer() {
 
 function applyHoraires(data) {
   for (const [id, val] of Object.entries(data)) {
-    const snameMatch = id.match(/^(.+_jury\d+)_sname(\d+)$/);
-    if (snameMatch) {
-      const creneauEl = document.getElementById(`${snameMatch[1]}_creneau${snameMatch[2]}`);
-      if (creneauEl) {
-        const snameEl = creneauEl.closest("tr")?.querySelector(".sname");
-        if (snameEl) snameEl.textContent = val;
-      }
-      continue;
-    }
     const el = document.getElementById(id);
     if (el) el.textContent = val;
+  }
+}
+
+function applyEtudiants(data) {
+  for (const [id, val] of Object.entries(data)) {
+    const m = id.match(/^(.+_jury\d+)_sname(\d+)$/);
+    if (!m) continue;
+    const creneauEl = document.getElementById(`${m[1]}_creneau${m[2]}`);
+    if (creneauEl) {
+      const snameEl = creneauEl.closest("tr")?.querySelector(".sname");
+      if (snameEl) snameEl.textContent = val;
+    }
   }
 }
 
@@ -693,6 +707,19 @@ async function loadHoraires() {
     }
   } catch (e) {
     console.warn("horaires.json non trouvé ou erreur de chargement.", e);
+  }
+}
+
+async function loadEtudiants() {
+  try {
+    const resp = await fetch("etudiants.json", { cache: "no-store" });
+    if (resp.ok) {
+      const data = await resp.json();
+      APP_CONFIG.etudiants = data;
+      applyEtudiants(data);
+    }
+  } catch (e) {
+    console.warn("etudiants.json non trouvé.", e);
   }
 }
 /* ── Toast ───────────────────────────────────────────────────────── */
@@ -728,6 +755,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   injectCfgUI();
   await loadFromServer();
   await loadHoraires();
+  await loadEtudiants();
   loadAll();
   if (isGHConfigured()) {
     await loadFromGitHub();
