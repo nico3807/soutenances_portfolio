@@ -50,6 +50,13 @@
         </svg>
         Exporter PDF
       </button>
+      <button class="cfg-btn" onclick="openCfgModal()">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+          <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.433-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.474l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+        </svg>
+        Configuration
+      </button>
     </nav>
     <div class="phdr">
       <h1>Soutenances Portfolio MMI 3 initiaux (année 2025-26)</h1>
@@ -59,12 +66,12 @@
       </div>
     </div>
     <div class="section">
-      <div class="sec-date"><h2>Lundi 29 juin 2026 matin</h2></div>
+      <div class="sec-date"><h2 id="mmi3_init_date1"></h2></div>
       <div class="jgrid">
         <div class="jcard">
           <div class="jcard-hdr">
             <span class="jury-name">Jury 1</span
-            ><span class="jury-date">Lundi 29 juin 2026 matin</span>
+            ><span class="jury-date" id="mmi3_init_jury1_date"></span>
           </div>
           <div class="jcard-meta">
             <div class="mrow">
@@ -108,27 +115,27 @@
             </thead>
             <tbody>
               <tr>
-                <td>9h55 - 10h20</td>
+                <td><span id="mmi3_init_jury1_creneau1"></span></td>
                 <td><span class="sname">ZANG ZONQIU</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>10h20 - 10h45</td>
+                <td><span id="mmi3_init_jury1_creneau2"></span></td>
                 <td><span class="sname">BEAUJOU</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>10h45 - 11h10</td>
+                <td><span id="mmi3_init_jury1_creneau3"></span></td>
                 <td><span class="sname">BEAUMONT</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>11h10 - 11h35</td>
+                <td><span id="mmi3_init_jury1_creneau4"></span></td>
                 <td><span class="sname">BESSON</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>11h35 - 12h00</td>
+                <td><span id="mmi3_init_jury1_creneau5"></span></td>
                 <td><span class="sname">BONNEMAYRE</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
@@ -138,7 +145,7 @@
         <div class="jcard">
           <div class="jcard-hdr">
             <span class="jury-name">Jury 2</span
-            ><span class="jury-date">Mercredi 29 juin 2026 matin</span>
+            ><span class="jury-date" id="mmi3_init_jury2_date"></span>
           </div>
           <div class="jcard-meta">
             <div class="mrow">
@@ -182,27 +189,27 @@
             </thead>
             <tbody>
               <tr>
-                <td>9h55 - 10h20</td>
+                <td><span id="mmi3_init_jury2_creneau1"></span></td>
                 <td><span class="sname">BOCCARDI</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>10h20 - 10h45</td>
+                <td><span id="mmi3_init_jury2_creneau2"></span></td>
                 <td><span class="sname">CERQUEIRA</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>10h45 - 11h10</td>
+                <td><span id="mmi3_init_jury2_creneau3"></span></td>
                 <td><span class="sname">CROS</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>11h10 - 11h35</td>
+                <td><span id="mmi3_init_jury2_creneau4"></span></td>
                 <td><span class="sname">FOULQUIER</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>11h35 - 12h00</td>
+                <td><span id="mmi3_init_jury2_creneau5"></span></td>
                 <td><span class="sname">GESLAIN</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
@@ -212,7 +219,7 @@
         <div class="jcard">
           <div class="jcard-hdr">
             <span class="jury-name">Jury 3</span
-            ><span class="jury-date">Mercredi 29 juin 2026 matin</span>
+            ><span class="jury-date" id="mmi3_init_jury3_date"></span>
           </div>
           <div class="jcard-meta">
             <div class="mrow">
@@ -256,27 +263,27 @@
             </thead>
             <tbody>
               <tr>
-                <td>9h55 - 10h20</td>
+                <td><span id="mmi3_init_jury3_creneau1"></span></td>
                 <td><span class="sname">CAETANO</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>10h20 - 10h45</td>
+                <td><span id="mmi3_init_jury3_creneau2"></span></td>
                 <td><span class="sname">CHKAF</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>10h45 - 11h10</td>
+                <td><span id="mmi3_init_jury3_creneau3"></span></td>
                 <td><span class="sname">CISSE</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>11h10 - 11h35</td>
+                <td><span id="mmi3_init_jury3_creneau4"></span></td>
                 <td><span class="sname">FERNANDEZ</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>11h35 - 12h00</td>
+                <td><span id="mmi3_init_jury3_creneau5"></span></td>
                 <td><span class="sname">FREBOURG</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
@@ -286,12 +293,12 @@
       </div>
     </div>
     <div class="section">
-      <div class="sec-date"><h2>Mercredi 29 juin 2026 après-midi</h2></div>
+      <div class="sec-date"><h2 id="mmi3_init_date2"></h2></div>
       <div class="jgrid">
         <div class="jcard">
           <div class="jcard-hdr">
             <span class="jury-name">Jury 5</span
-            ><span class="jury-date">Mercredi 29 juin 2026 après-midi</span>
+            ><span class="jury-date" id="mmi3_init_jury5_date"></span>
           </div>
           <div class="jcard-meta">
             <div class="mrow">
@@ -335,27 +342,27 @@
             </thead>
             <tbody>
               <tr>
-                <td>13h30 - 13h55</td>
+                <td><span id="mmi3_init_jury5_creneau1"></span></td>
                 <td><span class="sname">HERAULT</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>13h55 - 14h20</td>
+                <td><span id="mmi3_init_jury5_creneau2"></span></td>
                 <td><span class="sname">MORILLO</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>14h20 - 14h45</td>
+                <td><span id="mmi3_init_jury5_creneau3"></span></td>
                 <td><span class="sname">MUZARD</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>14h45 - 15h10</td>
+                <td><span id="mmi3_init_jury5_creneau4"></span></td>
                 <td><span class="sname">ROLAND</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
               <tr>
-                <td>15h10 - 15h35</td>
+                <td><span id="mmi3_init_jury5_creneau5"></span></td>
                 <td><span class="sname">VERREZ</span></td>
                 <td><span class="badge badge-dweb">DWeb-DI</span></td>
               </tr>
@@ -365,7 +372,7 @@
         <div class="jcard">
           <div class="jcard-hdr">
             <span class="jury-name">Jury 4</span
-            ><span class="jury-date">Mercredi 29 juin 2026 après-midi</span>
+            ><span class="jury-date" id="mmi3_init_jury4_date"></span>
           </div>
           <div class="jcard-meta">
             <div class="mrow">
@@ -409,27 +416,27 @@
             </thead>
             <tbody>
               <tr>
-                <td>13h30 - 13h55</td>
+                <td><span id="mmi3_init_jury4_creneau1"></span></td>
                 <td><span class="sname">GOGENDEAU</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>13h55 - 14h20</td>
+                <td><span id="mmi3_init_jury4_creneau2"></span></td>
                 <td><span class="sname">JEAN</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>14h20 - 14h45</td>
+                <td><span id="mmi3_init_jury4_creneau3"></span></td>
                 <td><span class="sname">KHIREDDINE</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>14h45 - 15h10</td>
+                <td><span id="mmi3_init_jury4_creneau4"></span></td>
                 <td><span class="sname">LETUPPE</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>15h10 - 15h35</td>
+                <td><span id="mmi3_init_jury4_creneau5"></span></td>
                 <td><span class="sname">LY</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
@@ -439,7 +446,7 @@
         <div class="jcard">
           <div class="jcard-hdr">
             <span class="jury-name">Jury 6</span
-            ><span class="jury-date">Lundi 29 juin 2026 après-midi</span>
+            ><span class="jury-date" id="mmi3_init_jury6_date"></span>
           </div>
           <div class="jcard-meta">
             <div class="mrow">
@@ -483,27 +490,27 @@
             </thead>
             <tbody>
               <tr>
-                <td>13h30 - 13h55</td>
+                <td><span id="mmi3_init_jury6_creneau1"></span></td>
                 <td><span class="sname">MAGOMEDOV</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>13h55 - 14h20</td>
+                <td><span id="mmi3_init_jury6_creneau2"></span></td>
                 <td><span class="sname">MARGHAD</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>14h20 - 14h45</td>
+                <td><span id="mmi3_init_jury6_creneau3"></span></td>
                 <td><span class="sname">PACCHIANA</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>14h45 - 15h10</td>
+                <td><span id="mmi3_init_jury6_creneau4"></span></td>
                 <td><span class="sname">PENEZ</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>
               <tr>
-                <td>15h10 - 15h35</td>
+                <td><span id="mmi3_init_jury6_creneau5"></span></td>
                 <td><span class="sname">PEREZ</span></td>
                 <td><span class="badge badge-crea">Créa</span></td>
               </tr>

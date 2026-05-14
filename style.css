@@ -657,6 +657,116 @@ a {
   display: none;
 }
 
+/* ── CONFIG MODAL ── */
+.cfg-btn {
+  background: var(--surface2);
+  color: #e3b341;
+  border: 1px solid #e3b341;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.15s;
+}
+.cfg-btn:hover {
+  background: #e3b341;
+  color: #0d1117;
+}
+.cfg-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  width: min(700px, 95vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  transform: translateY(16px);
+  transition: transform 0.2s;
+}
+.gh-modal-overlay.open .cfg-modal {
+  transform: translateY(0);
+}
+.cfg-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+.cfg-top-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.cfg-jury-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.cfg-jury-hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.cfg-jury-num {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+  min-width: 46px;
+}
+.cfg-jury-date-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.cfg-date-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color-scheme: dark;
+}
+.cfg-period-select {
+  padding: 6px 8px;
+  font-size: 12px;
+  min-width: 110px;
+}
+.cfg-creneaux {
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.cfg-creneau-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.cfg-creneau-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 12px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.cfg-creneau-input {
+  font-size: 12px !important;
+  padding: 5px 7px !important;
+}
+
 /* ── PRINT ── */
 @media print {
   @page {
