@@ -5,6 +5,37 @@ const PAGE_ID = (location.pathname.split("/").pop() || "index").replace(
   "",
 );
 const GH_KEY = "gh_cfg_v1";
+const GH_OWNER = "nico3807";
+const GH_REPO = "soutenances_portfolio";
+const GH_BRANCH = "main";
+let APP_CONFIG = {
+  enseignants: [],
+  salles: [],
+};
+
+/* ── Populators ─────────────────────────────────────────────────── */
+function populateSelects() {
+  document.querySelectorAll(".tselect").forEach((select) => {
+    const lbl = select.previousElementSibling;
+    let options = null;
+
+    if (lbl && lbl.classList.contains("mlbl")) {
+      const labelText = lbl.textContent.trim();
+      if (labelText.startsWith("Enseignant")) {
+        options = APP_CONFIG.enseignants;
+      } else if (labelText === "Salle") {
+        options = APP_CONFIG.salles;
+      }
+    }
+
+    if (options && options.length > 0) {
+      select.innerHTML = `<option value="">— Sélectionner —</option>`;
+      options.forEach((opt) => {
+        select.add(new Option(opt, opt));
+      });
+    }
+  });
+}
 
 /* ── localStorage auto-save ──────────────────────────────────────── */
 function saveT(el) {
@@ -37,7 +68,10 @@ function buildJSON() {
     }
   });
 
-  const data = {};
+  const data = {
+    _enseignants: APP_CONFIG.enseignants,
+    _salles: APP_CONFIG.salles,
+  };
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith(SK)) {
@@ -50,7 +84,18 @@ function buildJSON() {
 function applyJSON(text) {
   try {
     const data = JSON.parse(text);
+    if (data._enseignants) {
+      APP_CONFIG.enseignants = data._enseignants.sort((a, b) =>
+        a.localeCompare(b, "fr"),
+      );
+    }
+    if (data._salles) {
+      APP_CONFIG.salles = data._salles.sort((a, b) => a.localeCompare(b, "fr"));
+    }
+    populateSelects();
+
     for (const [id, val] of Object.entries(data)) {
+      if (id.startsWith("_")) continue;
       localStorage.setItem(SK + id, val);
       const el = document.getElementById(id);
       if (el) {
@@ -65,19 +110,23 @@ function applyJSON(text) {
   }
 }
 
-
 /* ── GitHub API ──────────────────────────────────────────────────── */
 function getGHConfig() {
   try {
-    return JSON.parse(localStorage.getItem(GH_KEY)) || null;
+    const stored = JSON.parse(localStorage.getItem(GH_KEY)) || {};
+    return {
+      token: stored.token || "",
+      owner: GH_OWNER,
+      repo: GH_REPO,
+      branch: GH_BRANCH,
+    };
   } catch {
-    return null;
+    return { token: "", owner: GH_OWNER, repo: GH_REPO, branch: GH_BRANCH };
   }
 }
 
 function isGHConfigured() {
-  const c = getGHConfig();
-  return !!(c && c.token && c.owner && c.repo);
+  return !!getGHConfig().token;
 }
 
 function ghFilePath() {
@@ -192,28 +241,14 @@ function injectGHUI() {
   modal.innerHTML = `
 <div class="gh-modal">
   <div class="gh-modal-hdr">
-    <span>⚙ Configuration GitHub</span>
+    <span>⚙ Token GitHub</span>
     <button class="gh-modal-close" onclick="closeGHModal()">✕</button>
   </div>
   <div class="gh-modal-body">
-    <p class="gh-modal-desc">Les sélections seront sauvegardées dans votre dépôt GitHub et accessibles depuis n'importe quel poste. Un <strong>Personal Access Token</strong> avec le scope <code>repo</code> est requis.</p>
+    <p class="gh-modal-desc">Les sélections sont sauvegardées dans <strong>${GH_OWNER}/${GH_REPO}</strong> (branche <code>${GH_BRANCH}</code>). Entrez votre <strong>Personal Access Token</strong> (scope <code>repo</code>) — à saisir une seule fois par poste.</p>
     <div class="gh-form-group">
       <label class="gh-label" for="gh-token">Token <span class="gh-hint">(GitHub → Settings → Developer settings → PAT)</span></label>
       <input id="gh-token" class="gh-input" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-    </div>
-    <div class="gh-form-row">
-      <div class="gh-form-group">
-        <label class="gh-label" for="gh-owner">Propriétaire</label>
-        <input id="gh-owner" class="gh-input" type="text" placeholder="votre-login">
-      </div>
-      <div class="gh-form-group">
-        <label class="gh-label" for="gh-repo">Dépôt (repo)</label>
-        <input id="gh-repo" class="gh-input" type="text" placeholder="soutenances-portfolio">
-      </div>
-    </div>
-    <div class="gh-form-group">
-      <label class="gh-label" for="gh-branch">Branche</label>
-      <input id="gh-branch" class="gh-input" type="text" placeholder="main">
     </div>
     <div id="gh-status" class="gh-status" style="display:none"></div>
   </div>
@@ -230,14 +265,7 @@ function injectGHUI() {
   document.body.appendChild(modal);
 
   const cfg = getGHConfig();
-  if (cfg) {
-    if (cfg.token) document.getElementById("gh-token").value = cfg.token;
-    if (cfg.owner) document.getElementById("gh-owner").value = cfg.owner;
-    if (cfg.repo) document.getElementById("gh-repo").value = cfg.repo;
-    document.getElementById("gh-branch").value = cfg.branch || "main";
-  } else {
-    document.getElementById("gh-branch").value = "main";
-  }
+  if (cfg.token) document.getElementById("gh-token").value = cfg.token;
 }
 
 function openGHModal() {
@@ -248,51 +276,36 @@ function closeGHModal() {
 }
 
 function saveGHFromModal() {
-  const cfg = {
-    token: document.getElementById("gh-token").value.trim(),
-    owner: document.getElementById("gh-owner").value.trim(),
-    repo: document.getElementById("gh-repo").value.trim(),
-    branch: document.getElementById("gh-branch").value.trim() || "main",
-  };
-  if (!cfg.token || !cfg.owner || !cfg.repo) {
-    showGHStatus("Veuillez remplir Token, Propriétaire et Dépôt.", "error");
+  const token = document.getElementById("gh-token").value.trim();
+  if (!token) {
+    showGHStatus("Veuillez saisir le token.", "error");
     return;
   }
-  localStorage.setItem(GH_KEY, JSON.stringify(cfg));
+  localStorage.setItem(GH_KEY, JSON.stringify({ token }));
   const btn = document.getElementById("gh-config-btn");
-  if (btn) btn.classList.add("gh-btn--active");
-  showGHStatus("Configuration enregistrée !", "success");
+  if (btn) btn.classList.add("gh-footer-link--active");
+  showGHStatus("Token enregistré !", "success");
   setTimeout(closeGHModal, 900);
 }
 
 function clearGHConfig() {
   localStorage.removeItem(GH_KEY);
   const btn = document.getElementById("gh-config-btn");
-  if (btn) btn.classList.remove("gh-btn--active");
-  ["gh-token", "gh-owner", "gh-repo"].forEach((id) => {
-    document.getElementById(id).value = "";
-  });
-  document.getElementById("gh-branch").value = "main";
-  showGHStatus("Configuration effacée.", "info");
+  if (btn) btn.classList.remove("gh-footer-link--active");
+  document.getElementById("gh-token").value = "";
+  showGHStatus("Token effacé.", "info");
 }
 
 async function testGHFromModal() {
-  const cfg = {
-    token: document.getElementById("gh-token").value.trim(),
-    owner: document.getElementById("gh-owner").value.trim(),
-    repo: document.getElementById("gh-repo").value.trim(),
-    branch: document.getElementById("gh-branch").value.trim() || "main",
-  };
-  if (!cfg.token || !cfg.owner || !cfg.repo) {
-    showGHStatus("Remplissez d'abord tous les champs.", "error");
+  const token = document.getElementById("gh-token").value.trim();
+  if (!token) {
+    showGHStatus("Saisissez d'abord le token.", "error");
     return;
   }
   showGHStatus("Connexion en cours…", "info");
-  const ok = await testGHConnection(cfg);
+  const ok = await testGHConnection({ token, owner: GH_OWNER, repo: GH_REPO });
   showGHStatus(
-    ok
-      ? "✓ Connexion réussie !"
-      : "✗ Échec — vérifiez le token et les noms (owner/repo).",
+    ok ? "✓ Connexion réussie !" : "✗ Échec — vérifiez le token.",
     ok ? "success" : "error",
   );
 }
@@ -331,7 +344,6 @@ async function saveSelectionsToFile() {
 
   await saveToGitHub();
 }
-
 
 /* ── Auto-load depuis le dossier courant (serveur local) ─────────── */
 async function loadFromServer() {
@@ -375,15 +387,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (lbl && lbl.classList.contains("mlbl")) {
       select.setAttribute("aria-label", lbl.textContent.trim());
     }
-  });
-
-  // Tri alphabétique automatique (corrigé pour ne pas effacer les valeurs par défaut)
-  document.querySelectorAll(".tselect").forEach((select) => {
-    const currentValue = select.value;
-    const options = Array.from(select.options).slice(1); // Ignore "— Sélectionner —"
-    options.sort((a, b) => a.text.localeCompare(b.text, "fr"));
-    options.forEach((opt) => select.appendChild(opt));
-    select.value = currentValue;
   });
 
   injectGHUI();
