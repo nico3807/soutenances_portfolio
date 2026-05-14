@@ -13,6 +13,7 @@ let APP_CONFIG = {
   salles: [],
   horaires: {},
 };
+let _cfgImportedNames = [];
 
 /* ── Populators ─────────────────────────────────────────────────── */
 function populateSelects() {
@@ -395,6 +396,16 @@ function injectCfgUI() {
       </div>
     </div>
     <div id="cfg-juries-container"></div>
+    <div class="cfg-import-section">
+      <div class="cfg-section-lbl">Importer les candidats</div>
+      <div class="cfg-import-row">
+        <label class="gh-label" style="white-space:nowrap;margin:0">Fichier .txt</label>
+        <input type="file" id="cfg-import-file" accept=".txt"
+               class="gh-input cfg-file-input" onchange="cfgImportFile(this)">
+        <span class="gh-hint" style="white-space:nowrap">Un nom par ligne</span>
+      </div>
+      <div id="cfg-import-preview" class="cfg-import-preview"></div>
+    </div>
     <div id="cfg-status" class="gh-status" style="display:none;margin-top:12px"></div>
   </div>
   <div class="gh-modal-footer">
@@ -407,7 +418,84 @@ function injectCfgUI() {
   document.body.appendChild(modal);
 }
 
+function cfgResetImport() {
+  _cfgImportedNames = [];
+  const preview = document.getElementById("cfg-import-preview");
+  if (preview) preview.innerHTML = "";
+  const fileInput = document.getElementById("cfg-import-file");
+  if (fileInput) fileInput.value = "";
+}
+
+function cfgGetSlotsPerJury() {
+  const count = parseInt(document.getElementById("cfg-jury-count").value) || 1;
+  const level = document.getElementById("cfg-level").value;
+  const slots = [];
+  for (let n = 1; n <= count; n++) {
+    let s = 0;
+    for (let m = 1; m <= CFG_MAX_CRENEAUX; m++) {
+      const el = document.getElementById(`cfg-j${n}-c${m}`);
+      if (el && el.value.trim()) s = m;
+    }
+    if (s === 0) {
+      for (let m = 1; m <= CFG_MAX_CRENEAUX; m++) {
+        if (APP_CONFIG.horaires[`${level}_jury${n}_creneau${m}`]) s = m;
+      }
+    }
+    slots.push(s || 0);
+  }
+  return slots;
+}
+
+function cfgImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const names = e.target.result
+      .split(/\r?\n/)
+      .map((s) => s.trim().toUpperCase())
+      .filter((s) => s.length > 0);
+    _cfgImportedNames = names;
+    cfgShowImportPreview(names);
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+function cfgShowImportPreview(names) {
+  const preview = document.getElementById("cfg-import-preview");
+  if (!preview) return;
+  if (!names.length) { preview.innerHTML = ""; return; }
+  const count = parseInt(document.getElementById("cfg-jury-count").value) || 1;
+  const slots = cfgGetSlotsPerJury();
+  let idx = 0;
+  let html = `<div class="cfg-import-preview-list">`;
+  for (let n = 1; n <= count; n++) {
+    const s = slots[n - 1] || 0;
+    html += `<div class="cfg-import-jury"><strong>Jury ${n}</strong><ol>`;
+    for (let m = 1; m <= s; m++) {
+      html += `<li>${idx < names.length ? names[idx++] : "<em>—</em>"}</li>`;
+    }
+    html += `</ol></div>`;
+  }
+  html += `</div>`;
+  if (idx < names.length) {
+    html += `<p class="cfg-import-warn">⚠ ${names.length - idx} nom(s) ignoré(s) — plus de noms que de créneaux</p>`;
+  }
+  preview.innerHTML = html;
+}
+
 function openCfgModal() {
+  const pwd = prompt("Veuillez saisir le mot de passe pour accéder à la configuration :");
+  if (pwd === null) return;
+  const secret = [126, 110, 90, 94, 130, 34, 94, 96, 104, 105, 110, 42, 41, 44, 41];
+  const isAuth =
+    pwd.length === secret.length &&
+    pwd.split("").every((c, i) => (c.charCodeAt(0) ^ 45) + i === secret[i]);
+  if (!isAuth) {
+    alert("Mot de passe incorrect. Accès refusé.");
+    return;
+  }
+  cfgResetImport();
   const levelEl = document.getElementById("cfg-level");
   if (levelEl && PAGE_ID in CFG_LEVELS) levelEl.value = PAGE_ID;
   cfgOnLevelChange();
@@ -423,6 +511,7 @@ function cfgOnLevelChange() {
   const count = getJuryCount(level);
   document.getElementById("cfg-jury-count").value = count;
   buildCfgJuries(level, count);
+  cfgResetImport();
 }
 
 function buildCfgJuries(level, count) {
@@ -466,6 +555,7 @@ function cfgUpdateJuryVisibility() {
     const el = document.getElementById(`cfg-jury-${n}`);
     if (el) el.style.display = n <= count ? "" : "none";
   }
+  if (_cfgImportedNames.length > 0) cfgShowImportPreview(_cfgImportedNames);
 }
 
 function showCfgStatus(msg, type) {
@@ -500,9 +590,22 @@ async function saveCfgModal() {
   }
   uniqueDates.forEach((d, i) => { newEntries[`${level}_date${i + 1}`] = d; });
 
+  if (_cfgImportedNames.length > 0) {
+    const slots = cfgGetSlotsPerJury();
+    let idx = 0;
+    for (let n = 1; n <= juryCount; n++) {
+      for (let m = 1; m <= (slots[n - 1] || 0); m++) {
+        if (idx < _cfgImportedNames.length) {
+          newEntries[`${level}_jury${n}_sname${m}`] = _cfgImportedNames[idx++];
+        }
+      }
+    }
+  }
+
   const merged = {};
   for (const [k, v] of Object.entries(APP_CONFIG.horaires)) {
     if (!k.startsWith(`${level}_`)) merged[k] = v;
+    else if (/_sname\d+$/.test(k) && _cfgImportedNames.length === 0) merged[k] = v;
   }
   Object.assign(merged, newEntries);
 
@@ -566,6 +669,15 @@ async function loadFromServer() {
 
 function applyHoraires(data) {
   for (const [id, val] of Object.entries(data)) {
+    const snameMatch = id.match(/^(.+_jury\d+)_sname(\d+)$/);
+    if (snameMatch) {
+      const creneauEl = document.getElementById(`${snameMatch[1]}_creneau${snameMatch[2]}`);
+      if (creneauEl) {
+        const snameEl = creneauEl.closest("tr")?.querySelector(".sname");
+        if (snameEl) snameEl.textContent = val;
+      }
+      continue;
+    }
     const el = document.getElementById(id);
     if (el) el.textContent = val;
   }
