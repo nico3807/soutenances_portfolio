@@ -161,6 +161,28 @@ async function loadFromGitHub() {
   }
 }
 
+async function loadHorairesFromGitHub() {
+  if (document.getElementById("juries-root")?.children.length > 0) return;
+  const cfg = getGHConfig();
+  if (!cfg || !cfg.token) return;
+  try {
+    const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/horaires.json?ref=${GH_BRANCH}`;
+    const resp = await fetch(url, {
+      headers: {
+        Authorization: `token ${cfg.token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+    });
+    if (!resp.ok) return;
+    const json = await resp.json();
+    const text = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ""))));
+    const data = JSON.parse(text);
+    APP_CONFIG.horaires = data;
+    renderJuries(PAGE_ID);
+    applyHoraires(data);
+  } catch { /* ignore */ }
+}
+
 async function saveJsonToGitHub(filename, jsonStr, message) {
   const cfg = getGHConfig();
   if (!cfg.token) throw new Error("Token non configuré");
@@ -795,9 +817,20 @@ async function loadHoraires() {
       APP_CONFIG.horaires = data;
       renderJuries(PAGE_ID);
       applyHoraires(data);
+      return;
+    }
+  } catch { /* file:// or server error — try raw GitHub */ }
+  try {
+    const rawUrl = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/horaires.json`;
+    const resp = await fetch(rawUrl, { cache: "no-store" });
+    if (resp.ok) {
+      const data = await resp.json();
+      APP_CONFIG.horaires = data;
+      renderJuries(PAGE_ID);
+      applyHoraires(data);
     }
   } catch (e) {
-    console.warn("horaires.json non trouvé ou erreur de chargement.", e);
+    console.warn("Impossible de charger horaires.json", e);
   }
 }
 
@@ -839,8 +872,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadHoraires();
   await loadFromServer();
   await loadEtudiants();
-  loadAll();
   if (isGHConfigured()) {
+    await loadHorairesFromGitHub();
     await loadFromGitHub();
   }
+  loadAll();
 });
