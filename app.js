@@ -348,8 +348,9 @@ const CFG_LEVELS = {
   mmi3_init: "MMI 3 — Initiaux",
   mmi3_alt:  "MMI 3 — Alternants",
 };
-const CFG_MAX_JURIES   = 8;
-const CFG_MAX_CRENEAUX = 8;
+const CFG_MAX_JURIES    = 8;
+const CFG_MAX_CRENEAUX  = 8;
+const CFG_MAX_TEACHERS  = 5;
 
 function parseJuryDate(str) {
   str = (str || "").trim();
@@ -394,6 +395,12 @@ function getJuryCount(level) {
   return n || 1;
 }
 
+function getTeacherCount(level) {
+  const stored = parseInt(APP_CONFIG.horaires[`${level}_teacher_count`]);
+  if (!isNaN(stored) && stored >= 1) return stored;
+  return PAGE_LEVEL_CFG[level]?.teachers ?? 2;
+}
+
 const PAGE_LEVEL_CFG = {
   mmi1:      { teachers: 3 },
   mmi2_init: { teachers: 2 },
@@ -415,7 +422,7 @@ function renderJuries(level) {
   if (!cfg) return;
 
   const h = APP_CONFIG.horaires;
-  const teacherCount = cfg.teachers;
+  const teacherCount = getTeacherCount(level);
 
   const sectionDates = [];
   for (let i = 1; i <= 20; i++) {
@@ -491,6 +498,11 @@ function injectCfgUI() {
         <label class="gh-label">Nombre de jurys</label>
         <input type="number" id="cfg-jury-count" class="gh-input" min="1" max="${CFG_MAX_JURIES}"
                style="width:70px" oninput="cfgUpdateJuryVisibility()">
+      </div>
+      <div class="gh-form-group" style="margin:0">
+        <label class="gh-label">Nb enseignants / jury</label>
+        <input type="number" id="cfg-teacher-count" class="gh-input" min="1" max="${CFG_MAX_TEACHERS}"
+               style="width:70px">
       </div>
     </div>
     <div id="cfg-juries-container"></div>
@@ -608,6 +620,7 @@ function cfgOnLevelChange() {
   const level = document.getElementById("cfg-level").value;
   const count = getJuryCount(level);
   document.getElementById("cfg-jury-count").value = count;
+  document.getElementById("cfg-teacher-count").value = getTeacherCount(level);
   buildCfgJuries(level, count);
   cfgResetImport();
 }
@@ -677,7 +690,9 @@ async function saveCfgModal() {
   }
   const level = document.getElementById("cfg-level").value;
   const juryCount = parseInt(document.getElementById("cfg-jury-count").value) || 1;
+  const teacherCount = parseInt(document.getElementById("cfg-teacher-count").value) || 2;
   const newEntries = {};
+  newEntries[`${level}_teacher_count`] = teacherCount;
   const uniqueDates = [];
 
   for (let n = 1; n <= juryCount; n++) {
