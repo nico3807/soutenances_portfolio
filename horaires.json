@@ -176,6 +176,11 @@
   "mmi2_init_jury4_creneau5": "11h05-11h30",
   "mmi2_init_jury4_creneau6": "11h30-11h55",
   "mmi2_init_jury4_creneau7": "11h55-12h20",
+  "mmi2_init_jury5_date": " matin",
+  "mmi2_init_jury5_badge": "empty",
+  "mmi2_init_jury6_date": " matin",
+  "mmi2_init_jury6_badge": "empty",
   "mmi2_init_date1": "Vendredi 28 août 2026 matin",
-  "mmi2_init_date2": "Mercredi 1 juillet 2026 matin"
+  "mmi2_init_date2": "Mercredi 1 juillet 2026 matin",
+  "mmi2_init_date3": " matin"
 }
