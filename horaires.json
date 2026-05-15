@@ -168,5 +168,22 @@
   "mmi2_init_jury5_creneau5": "11h05-11h30",
   "mmi2_init_jury5_creneau6": "11h30-11h55",
   "mmi2_init_date1": "Mardi 30 juin 2026 matin",
-  "mmi2_init_date2": "Mercredi 1 juillet 2026 matin"
+  "mmi2_init_date2": "Mercredi 1 juillet 2026 matin",
+  "mmi2_init_jury1_badge": "crea",
+  "mmi2_init_jury2_badge": "dweb",
+  "mmi2_init_jury3_badge": "crea",
+  "mmi2_init_jury4_badge": "dweb",
+  "mmi2_init_jury5_badge": "crea",
+  "mmi2_alt_jury1_badge": "dweb",
+  "mmi2_alt_jury2_badge": "crea",
+  "mmi2_alt_jury3_badge": "crea",
+  "mmi3_init_jury1_badge": "dweb",
+  "mmi3_init_jury2_badge": "crea",
+  "mmi3_init_jury3_badge": "dweb",
+  "mmi3_init_jury4_badge": "crea",
+  "mmi3_init_jury5_badge": "dweb",
+  "mmi3_init_jury6_badge": "crea",
+  "mmi3_alt_jury1_badge": "crea",
+  "mmi3_alt_jury2_badge": "dweb",
+  "mmi3_alt_jury3_badge": "crea"
 }

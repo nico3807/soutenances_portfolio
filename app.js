@@ -372,6 +372,81 @@ function getJuryCount(level) {
   return n || 1;
 }
 
+const PAGE_LEVEL_CFG = {
+  mmi1:      { teachers: 3 },
+  mmi2_init: { teachers: 2 },
+  mmi2_alt:  { teachers: 2 },
+  mmi3_init: { teachers: 2 },
+  mmi3_alt:  { teachers: 2 },
+};
+
+function getBadgeClass(badge) {
+  if (badge === "crea") return { cls: "badge badge-crea", lbl: "Créa" };
+  if (badge === "dweb") return { cls: "badge badge-dweb", lbl: "DWeb-DI" };
+  return { cls: "badge badge-empty", lbl: "—" };
+}
+
+function renderJuries(level) {
+  const root = document.getElementById("juries-root");
+  if (!root) return;
+  const cfg = PAGE_LEVEL_CFG[level];
+  if (!cfg) return;
+
+  const h = APP_CONFIG.horaires;
+  const teacherCount = cfg.teachers;
+
+  const sectionDates = [];
+  for (let i = 1; i <= 20; i++) {
+    const d = h[`${level}_date${i}`];
+    if (d === undefined) break;
+    if (!sectionDates.includes(d)) sectionDates.push(d);
+  }
+
+  let juryCount = 0;
+  for (let i = 1; i <= CFG_MAX_JURIES; i++) {
+    if (h[`${level}_jury${i}_date`] !== undefined || h[`${level}_jury${i}_creneau1`] !== undefined) juryCount = i;
+  }
+  if (juryCount === 0) { root.innerHTML = ""; return; }
+
+  const sectionJuries = {};
+  for (let n = 1; n <= juryCount; n++) {
+    const juryDate = h[`${level}_jury${n}_date`] || "";
+    let si = sectionDates.indexOf(juryDate);
+    if (si === -1) si = Math.max(0, sectionDates.length - 1);
+    if (!sectionJuries[si]) sectionJuries[si] = [];
+    sectionJuries[si].push(n);
+  }
+  if (sectionDates.length === 0) {
+    sectionJuries[0] = Array.from({ length: juryCount }, (_, i) => i + 1);
+  }
+
+  let html = "";
+  const numSections = Math.max(sectionDates.length, 1);
+  for (let si = 0; si < numSections; si++) {
+    const juries = sectionJuries[si] || [];
+    if (juries.length === 0) continue;
+    const dateKey = `${level}_date${si + 1}`;
+    html += `<div class="section"><div class="sec-date"><h2 id="${dateKey}"></h2></div><div class="jgrid">`;
+    juries.forEach((juryN, pos) => {
+      const bi = getBadgeClass(h[`${level}_jury${juryN}_badge`]);
+      let meta = "";
+      for (let t = 0; t < teacherCount; t++) {
+        meta += `<div class="mrow"><span class="mlbl">Enseignant ${t + 1}</span><select class="tselect" id="${level}_${si}_${pos}_${t}" aria-label="Enseignant ${t + 1}" onchange="saveT(this)"><option value="">— Sélectionner —</option></select><span class="print-val"></span></div>`;
+      }
+      meta += `<div class="mrow"><span class="mlbl">Salle</span><select class="tselect" id="${level}_${si}_${pos}_salle" aria-label="Salle" onchange="saveT(this)"><option value="">— Sélectionner —</option></select><span class="print-val"></span></div>`;
+      let rows = "";
+      for (let m = 1; m <= CFG_MAX_CRENEAUX; m++) {
+        const ck = `${level}_jury${juryN}_creneau${m}`;
+        if (h[ck] === undefined) break;
+        rows += `<tr><td><span id="${ck}"></span></td><td><span class="sname"></span></td><td><span class="${bi.cls}">${bi.lbl}</span></td></tr>`;
+      }
+      html += `<div class="jcard"><div class="jcard-hdr"><span class="jury-name">Jury ${juryN}</span><span class="jury-date" id="${level}_jury${juryN}_date"></span></div><div class="jcard-meta">${meta}</div><table class="stable"><thead><tr><th>Horaire</th><th>Étudiant</th><th>Parcours</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    });
+    html += `</div></div>`;
+  }
+  root.innerHTML = html;
+}
+
 function injectCfgUI() {
   const levelOptions = Object.entries(CFG_LEVELS)
     .map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
@@ -520,6 +595,7 @@ function buildCfgJuries(level, count) {
   for (let n = 1; n <= CFG_MAX_JURIES; n++) {
     const { dateStr, period } = parseJuryDate(APP_CONFIG.horaires[`${level}_jury${n}_date`] || "");
     const isoDate = frenchToIso(dateStr);
+    const currentBadge = APP_CONFIG.horaires[`${level}_jury${n}_badge`] || "empty";
     let creneauxHtml = "";
     for (let m = 1; m <= CFG_MAX_CRENEAUX; m++) {
       const val = APP_CONFIG.horaires[`${level}_jury${n}_creneau${m}`] || "";
@@ -542,6 +618,11 @@ function buildCfgJuries(level, count) {
           <select id="cfg-j${n}-period" class="gh-input cfg-period-select">
             <option value="matin"${period === "matin" ? " selected" : ""}>matin</option>
             <option value="après-midi"${period === "après-midi" ? " selected" : ""}>après-midi</option>
+          </select>
+          <select id="cfg-j${n}-badge" class="gh-input cfg-badge-select">
+            <option value="empty"${currentBadge === "empty" ? " selected" : ""}>— Parcours —</option>
+            <option value="crea"${currentBadge === "crea" ? " selected" : ""}>Créa</option>
+            <option value="dweb"${currentBadge === "dweb" ? " selected" : ""}>DWeb-DI</option>
           </select>
         </div>
         <div class="cfg-creneaux">${creneauxHtml}</div>
@@ -584,6 +665,8 @@ async function saveCfgModal() {
     const fullDate = `${dateStr} ${period}`;
     newEntries[`${level}_jury${n}_date`] = fullDate;
     if (!uniqueDates.includes(fullDate)) uniqueDates.push(fullDate);
+    const badge = document.getElementById(`cfg-j${n}-badge`)?.value || "empty";
+    newEntries[`${level}_jury${n}_badge`] = badge;
     for (let m = 1; m <= CFG_MAX_CRENEAUX; m++) {
       const val = (document.getElementById(`cfg-j${n}-c${m}`)?.value || "").trim();
       if (val) newEntries[`${level}_jury${n}_creneau${m}`] = val;
@@ -605,6 +688,11 @@ async function saveCfgModal() {
     await saveJsonToGitHub("donnees.json", buildJSON(),
       `Sync donnees ${level} — ${ts}`);
     APP_CONFIG.horaires = merged;
+    if (level === PAGE_ID) {
+      renderJuries(level);
+      populateSelects();
+      loadAll();
+    }
     applyHoraires(merged);
 
     if (_cfgImportedNames.length > 0) {
@@ -627,6 +715,8 @@ async function saveCfgModal() {
         `Candidats ${level} — ${ts}`);
       APP_CONFIG.etudiants = mergedEtudiants;
       applyEtudiants(mergedEtudiants);
+    } else if (level === PAGE_ID) {
+      applyEtudiants(APP_CONFIG.etudiants);
     }
 
     showCfgStatus("✓ Configuration sauvegardée !", "success");
@@ -703,6 +793,7 @@ async function loadHoraires() {
     if (resp.ok) {
       const data = await resp.json();
       APP_CONFIG.horaires = data;
+      renderJuries(PAGE_ID);
       applyHoraires(data);
     }
   } catch (e) {
@@ -743,18 +834,10 @@ function exportPDF() {
 
 /* ── Init ────────────────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", async () => {
-  // Applique la même structure d'accessibilité (aria-label) à toutes les pages
-  document.querySelectorAll(".tselect").forEach((select) => {
-    const lbl = select.previousElementSibling;
-    if (lbl && lbl.classList.contains("mlbl")) {
-      select.setAttribute("aria-label", lbl.textContent.trim());
-    }
-  });
-
   injectGHUI();
   injectCfgUI();
-  await loadFromServer();
   await loadHoraires();
+  await loadFromServer();
   await loadEtudiants();
   loadAll();
   if (isGHConfigured()) {
